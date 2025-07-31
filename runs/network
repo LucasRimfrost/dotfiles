@@ -1,0 +1,230 @@
+#!/usr/bin/env bash
+
+# NetworkManager + iwd + nm-applet Setup Script with Security Hardening
+# This script sets up NetworkManager with iwd backend, nm-applet GUI, and security features
+
+set -e  # Exit on any error
+
+echo "Setting up NetworkManager + iwd + nm-applet with security hardening..."
+
+# Colors for output
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+YELLOW='\033[1;33m'
+BLUE='\033[0;34m'
+NC='\033[0m' # No Color
+
+print_status() {
+    echo -e "${BLUE}[INFO]${NC} $1"
+}
+
+print_success() {
+    echo -e "${GREEN}[SUCCESS]${NC} $1"
+}
+
+print_warning() {
+    echo -e "${YELLOW}[WARNING]${NC} $1"
+}
+
+print_error() {
+    echo -e "${RED}[ERROR]${NC} $1"
+}
+
+# Check if running as root
+if [[ $EUID -eq 0 ]]; then
+    print_error "This script should not be run as root!"
+    print_status "Run it as your regular user - it will use sudo when needed."
+    exit 1
+fi
+
+# Check if sudo is available
+if ! command -v sudo &> /dev/null; then
+    print_error "sudo is required but not installed. Please install sudo first."
+    exit 1
+fi
+
+print_status "Installing required packages..."
+sudo pacman -S --needed --noconfirm networkmanager iwd network-manager-applet bind-tools
+
+print_status "Stopping and disabling conflicting services..."
+# Stop conflicting services if they're running
+sudo systemctl stop wpa_supplicant.service 2>/dev/null || true
+sudo systemctl stop dhcpcd.service 2>/dev/null || true
+sudo systemctl stop netctl.service 2>/dev/null || true
+
+# Disable conflicting services
+sudo systemctl disable wpa_supplicant.service 2>/dev/null || true
+sudo systemctl disable dhcpcd.service 2>/dev/null || true
+sudo systemctl disable netctl.service 2>/dev/null || true
+
+print_status "Creating NetworkManager configuration to use iwd backend..."
+sudo mkdir -p /etc/NetworkManager/conf.d
+sudo tee /etc/NetworkManager/conf.d/wifi_backend.conf > /dev/null << 'EOF'
+[device]
+wifi.backend=iwd
+EOF
+
+print_status "Creating iwd configuration with your security settings..."
+sudo mkdir -p /etc/iwd
+sudo tee /etc/iwd/main.conf > /dev/null << 'EOF'
+[General]
+# Enable built-in network configuration
+EnableNetworkConfiguration=true
+
+[Network]
+# Enable DHCP for IPv4
+EnableIPv4=true
+# Enable IPv6
+EnableIPv6=true
+# Use systemd-resolved for DNS instead of DHCP DNS
+NameResolvingService=none
+EOF
+
+print_status "Creating secure DNS configuration with systemd-resolved..."
+# Backup existing resolved.conf
+if [[ -f /etc/systemd/resolved.conf ]]; then
+    sudo cp /etc/systemd/resolved.conf /etc/systemd/resolved.conf.backup
+    print_status "Backed up existing resolved.conf to resolved.conf.backup"
+fi
+
+sudo tee /etc/systemd/resolved.conf > /dev/null << 'EOF'
+#  This file is part of systemd.
+#
+#  systemd is free software; you can redistribute it and/or modify it under the
+#  terms of the GNU Lesser General Public License as published by the Free
+#  Software Foundation; either version 2.1 of the License, or (at your option)
+#  any later version.
+#
+# Entries in this file show the compile time defaults. Local configuration
+# should be created by either modifying this file (or a copy of it placed in
+# /etc/ if the original file is shipped in /usr/), or by creating "drop-ins" in
+# the /etc/systemd/resolved.conf.d/ directory. The latter is generally
+# recommended. Defaults can be restored by simply deleting the main
+# configuration file and all drop-ins located in /etc/.
+#
+# Use 'systemd-analyze cat-config systemd/resolved.conf' to display the full config.
+#
+# See resolved.conf(5) for details.
+
+[Resolve]
+# Primary DNS servers with DNS-over-TLS
+DNS=1.1.1.1#cloudflare-dns.com 8.8.8.8#dns.google
+# Fallback DNS servers
+FallbackDNS=1.0.0.1#cloudflare-dns.com 8.8.4.4#dns.google
+# Route all DNS queries through systemd-resolved for consistency
+Domains=~.
+# Enable DNSSEC validation for security
+DNSSEC=yes
+# Enable DNS-over-TLS for encrypted DNS queries
+DNSOverTLS=yes
+# Disable Multicast DNS for security (can be exploited)
+MulticastDNS=no
+# Disable Link-Local Multicast Name Resolution for security
+LLMNR=no
+# Enable DNS caching for performance
+Cache=yes
+# Don't accept DNS responses from localhost for security
+CacheFromLocalhost=no
+# Enable DNS stub listener
+DNSStubListener=yes
+# Read /etc/hosts file
+ReadEtcHosts=yes
+# Don't resolve single-label hostnames for security
+ResolveUnicastSingleLabel=no
+# Don't keep stale cache entries
+StaleRetentionSec=0
+EOF
+
+print_status "Enabling required services..."
+sudo systemctl enable NetworkManager.service
+sudo systemctl enable iwd.service
+sudo systemctl enable systemd-resolved.service
+
+print_status "Starting services..."
+sudo systemctl start systemd-resolved.service
+sudo systemctl start iwd.service
+sudo systemctl start NetworkManager.service
+
+# Wait a moment for services to start
+sleep 3
+
+# Check service status
+print_status "Checking service status..."
+if systemctl is-active --quiet NetworkManager.service; then
+    print_success "NetworkManager is running"
+else
+    print_error "NetworkManager failed to start"
+fi
+
+if systemctl is-active --quiet iwd.service; then
+    print_success "iwd is running"
+else
+    print_error "iwd failed to start"
+fi
+
+if systemctl is-active --quiet systemd-resolved.service; then
+    print_success "systemd-resolved is running"
+else
+    print_error "systemd-resolved failed to start"
+fi
+
+# Check if nm-applet is available
+if command -v nm-applet &> /dev/null; then
+    print_success "nm-applet is installed and ready"
+    print_status "To start nm-applet: nm-applet &"
+    print_status "Add nm-applet to your desktop environment's autostart"
+else
+    print_error "nm-applet not found after installation"
+fi
+
+# Test DNS resolution
+print_status "Testing DNS resolution..."
+if command -v dig &> /dev/null; then
+    if dig +short @127.0.0.53 google.com &> /dev/null; then
+        print_success "DNS resolution is working"
+    else
+        print_warning "DNS resolution test failed - check systemd-resolved status"
+    fi
+else
+    print_warning "dig command not found - DNS test skipped"
+fi
+
+print_success "Setup complete!"
+
+echo ""
+print_status "NEXT STEPS:"
+echo "1. Start nm-applet manually: nm-applet &"
+echo "2. Add nm-applet to your DE's autostart applications"
+echo "3. Connect to WiFi via nm-applet system tray or nmcli"
+echo "4. Reboot to ensure all services start cleanly"
+
+echo ""
+print_status "USEFUL COMMANDS:"
+echo "• List WiFi networks: nmcli device wifi list"
+echo "• Connect to WiFi: nmcli device wifi connect 'SSID' password 'password'"
+echo "• Check connection status: nmcli connection show"
+echo "• Use GUI: nm-connection-editor"
+echo "• Use TUI: nmtui"
+echo "• Check DNS status: systemd-resolve --status"
+echo "• Test DNS: dig @127.0.0.53 example.com"
+echo "• DNS lookup tools: dig, nslookup, host (from bind-tools package)"
+
+echo ""
+print_status "SECURITY FEATURES ENABLED:"
+echo "• DNS-over-TLS (encrypted DNS queries)"
+echo "• DNSSEC validation (prevents DNS spoofing)"
+echo "• Disabled multicast DNS and LLMNR (reduces attack surface)"
+echo "• Secure DNS caching configuration"
+echo "• Primary DNS: Cloudflare (1.1.1.1) and Google (8.8.8.8)"
+echo "• All DNS queries routed through systemd-resolved"
+
+echo ""
+print_warning "IMPORTANT NOTES:"
+echo "• Your original resolved.conf was backed up to resolved.conf.backup"
+echo "• iwd handles WiFi, NetworkManager handles overall network management"
+echo "• systemd-resolved provides secure DNS resolution"
+echo "• USB ethernet adapters will work automatically with NetworkManager"
+
+echo ""
+print_success "NetworkManager + iwd + nm-applet setup completed successfully!"
+print_status "Consider rebooting to ensure all services start properly on boot."

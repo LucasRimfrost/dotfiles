@@ -1,3 +1,5 @@
 #!/usr/bin/env bash
 # Install hyprland and dependencies
-sudo pacman -S --noconfirm hyprland xdg-desktop-portal-hyprland
+sudo pacman -S --noconfirm --needed hyprland hyprpaper xdg-desktop-portal-hyprland
+
+paru -S --noconfirm --needed hyprshot hyprpicker-git

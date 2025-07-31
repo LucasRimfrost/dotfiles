@@ -1,0 +1,3 @@
+#!/usr/bin/env bash
+# Install hyprland and dependencies
+sudo pacman -S --noconfirm --needed dunst

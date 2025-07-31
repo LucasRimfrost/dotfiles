@@ -1,2 +1,2 @@
 #!/usr/bin/env bash
-sudo pacman -S --noconfirm waybar
+sudo pacman -S --noconfirm --needed waybar

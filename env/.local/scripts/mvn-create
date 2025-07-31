@@ -1,0 +1,463 @@
+#!/bin/bash
+
+# ANSI färgkoder för bättre formatering
+GREEN='\033[0;32m'
+BLUE='\033[0;34m'
+YELLOW='\033[1;33m'
+RED='\033[0;31m'
+NC='\033[0m' # No Color
+
+# Standardvärden med uppdaterade versioner
+DEFAULT_GROUP_ID="com.mycompany.app"
+DEFAULT_ARTIFACT_ID="my-app"
+DEFAULT_ARCHETYPE_ARTIFACT_ID="maven-archetype-quickstart"
+DEFAULT_ARCHETYPE_VERSION="1.5" # Uppdaterad version
+DEFAULT_JAVA_VERSION="21"       # Modern Java LTS-version
+DEFAULT_INIT_GIT=true
+DEFAULT_QUIET_MODE=true         # Tyst Maven-output som standard
+
+# Funktion för att visa hjälpmeddelande
+show_help() {
+    echo -e "${BLUE}Modern Maven Projekt Generator${NC}"
+    echo
+    echo "Detta script skapar ett nytt Maven-projekt med anpassningar."
+    echo
+    echo "Användning: $0 [alternativ]"
+    echo
+    echo "Alternativ:"
+    echo "  -h, --help                 Visa detta hjälpmeddelande"
+    echo "  -g, --group-id ID          Ange groupId (standard: $DEFAULT_GROUP_ID)"
+    echo "  -a, --artifact-id ID       Ange artifactId (standard: $DEFAULT_ARTIFACT_ID)"
+    echo "  -t, --archetype ID         Ange archetypeArtifactId (standard: $DEFAULT_ARCHETYPE_ARTIFACT_ID)"
+    echo "  -v, --archetype-version V  Ange archetypeVersion (standard: $DEFAULT_ARCHETYPE_VERSION)"
+    echo "  -j, --java-version V       Ange Java-version (standard: $DEFAULT_JAVA_VERSION)"
+    echo "  --no-git                   Initiera inte Git-repository"
+    echo "  --verbose                  Visa utförlig Maven-output"
+    echo "  --quiet                    Minimera Maven-output (standard)"
+    echo
+    echo "Tillgängliga archetyper:"
+    echo "  maven-archetype-quickstart     Grundläggande Java-applikation (standard)"
+    echo "  maven-archetype-webapp         Webb-applikation"
+    echo
+}
+
+# Funktion för att fråga efter inmatning med standardvärde
+prompt_with_default() {
+    local prompt="$1"
+    local default="$2"
+    local input
+    read -p "$prompt [$default]: " input
+    echo "${input:-$default}"
+}
+
+# Funktion för att kontrollera om ett kommando finns
+command_exists() {
+    command -v "$1" >/dev/null 2>&1
+}
+
+# Hantera kommandoradsargument
+while [[ $# -gt 0 ]]; do
+    case "$1" in
+        -h|--help)
+            show_help
+            exit 0
+            ;;
+        -g|--group-id)
+            GROUP_ID="$2"
+            shift 2
+            ;;
+        -a|--artifact-id)
+            ARTIFACT_ID="$2"
+            shift 2
+            ;;
+        -t|--archetype)
+            ARCHETYPE_ARTIFACT_ID="$2"
+            shift 2
+            ;;
+        -v|--archetype-version)
+            ARCHETYPE_VERSION="$2"
+            shift 2
+            ;;
+        -j|--java-version)
+            JAVA_VERSION="$2"
+            shift 2
+            ;;
+        --no-git)
+            INIT_GIT=false
+            shift
+            ;;
+        --verbose)
+            QUIET_MODE=false
+            shift
+            ;;
+        --quiet)
+            QUIET_MODE=true
+            shift
+            ;;
+        *)
+            echo -e "${RED}Okänt alternativ: $1${NC}"
+            show_help
+            exit 1
+            ;;
+    esac
+done
+
+# Kontrollera om Maven är installerat
+if ! command_exists mvn; then
+    echo -e "${RED}Maven är inte installerat. Vänligen installera Maven innan du kör detta script.${NC}"
+    exit 1
+fi
+
+# Skriv ut rubrik
+echo -e "\n${BLUE}===== Maven Projekt Generator =====${NC}\n"
+
+# Fråga efter värden om de inte angivits via kommandoraden
+[[ -z "$GROUP_ID" ]] && GROUP_ID=$(prompt_with_default "Ange groupId" "$DEFAULT_GROUP_ID")
+[[ -z "$ARTIFACT_ID" ]] && ARTIFACT_ID=$(prompt_with_default "Ange artifactId" "$DEFAULT_ARTIFACT_ID")
+[[ -z "$ARCHETYPE_ARTIFACT_ID" ]] && ARCHETYPE_ARTIFACT_ID=$(prompt_with_default "Ange archetypeArtifactId" "$DEFAULT_ARCHETYPE_ARTIFACT_ID")
+[[ -z "$ARCHETYPE_VERSION" ]] && ARCHETYPE_VERSION=$(prompt_with_default "Ange archetypeVersion" "$DEFAULT_ARCHETYPE_VERSION")
+[[ -z "$JAVA_VERSION" ]] && JAVA_VERSION=$(prompt_with_default "Ange Java-version" "$DEFAULT_JAVA_VERSION")
+[[ -z "$INIT_GIT" ]] && INIT_GIT=$DEFAULT_INIT_GIT
+[[ -z "$QUIET_MODE" ]] && QUIET_MODE=$DEFAULT_QUIET_MODE
+
+# Kontrollera om projektmappen redan finns
+if [ -d "$ARTIFACT_ID" ]; then
+    echo -e "${RED}Fel: Mappen '$ARTIFACT_ID' finns redan.${NC}"
+    echo -e "Välj ett annat artifactId eller ta bort den befintliga mappen."
+    exit 1
+fi
+
+# Bekräfta inställningar
+echo -e "\n${BLUE}Projektinställningar:${NC}"
+echo -e "Group ID: ${YELLOW}$GROUP_ID${NC}"
+echo -e "Artifact ID: ${YELLOW}$ARTIFACT_ID${NC}"
+echo -e "Archetype: ${YELLOW}$ARCHETYPE_ARTIFACT_ID${NC}"
+echo -e "Archetype Version: ${YELLOW}$ARCHETYPE_VERSION${NC}"
+echo -e "Java Version: ${YELLOW}$JAVA_VERSION${NC}"
+echo -e "Initiera Git: ${YELLOW}$INIT_GIT${NC}"
+echo -e "Tyst Maven-läge: ${YELLOW}$QUIET_MODE${NC}"
+echo
+
+# Bekräfta fortsättning
+read -p "Fortsätt med dessa inställningar? (J/n): " confirm
+confirm=${confirm:-J}
+if [[ ! "$confirm" =~ ^[Jj]$ ]]; then
+    echo -e "${RED}Avbryter.${NC}"
+    exit 0
+fi
+
+echo -e "\n${BLUE}Skapar Maven-projekt...${NC}"
+
+# Kör Maven-kommando med lämplig verbositet
+MAVEN_CMD="mvn archetype:generate"
+
+if [ "$QUIET_MODE" = true ]; then
+    MAVEN_CMD="$MAVEN_CMD -q -B"
+fi
+
+$MAVEN_CMD \
+    -DgroupId="$GROUP_ID" \
+    -DartifactId="$ARTIFACT_ID" \
+    -DarchetypeArtifactId="$ARCHETYPE_ARTIFACT_ID" \
+    -DarchetypeVersion="$ARCHETYPE_VERSION" \
+    -DinteractiveMode=false
+
+# Kontrollera om Maven-kommandot lyckades
+if [ $? -ne 0 ]; then
+    echo -e "${RED}Maven-projektets skapande misslyckades!${NC}"
+    exit 1
+fi
+
+echo -e "${GREEN}Maven-projekt har skapats framgångsrikt!${NC}"
+
+# Definiera projektmappar
+PROJECT_DIR="$ARTIFACT_ID"
+SRC_DIR="$PROJECT_DIR/src/main/java/$(echo $GROUP_ID | tr '.' '/')"
+TEST_DIR="$PROJECT_DIR/src/test/java/$(echo $GROUP_ID | tr '.' '/')"
+POM_FILE="$PROJECT_DIR/pom.xml"
+
+# Byt namn på App.java till Main.java om den finns
+if [ -f "$SRC_DIR/App.java" ]; then
+    echo -e "${BLUE}Byter namn på App.java till Main.java...${NC}"
+    mv "$SRC_DIR/App.java" "$SRC_DIR/Main.java"
+    sed -i 's/public class App/public class Main/' "$SRC_DIR/Main.java"
+
+    # Uppdatera även testklassen om den finns
+    if [ -f "$TEST_DIR/AppTest.java" ]; then
+        mv "$TEST_DIR/AppTest.java" "$TEST_DIR/MainTest.java"
+        sed -i 's/AppTest/MainTest/g' "$TEST_DIR/MainTest.java"
+        sed -i 's/App/Main/g' "$TEST_DIR/MainTest.java"
+    fi
+fi
+
+# Uppdatera pom.xml
+echo -e "${BLUE}Uppdaterar pom.xml...${NC}"
+
+# Uppdatera main class-referens om den finns
+sed -i "s/<mainClass>$GROUP_ID.App<\/mainClass>/<mainClass>$GROUP_ID.Main<\/mainClass>/g" "$POM_FILE"
+
+# Se till att Java-versionen är inställd i properties
+if grep -q "<properties>" "$POM_FILE"; then
+    # Lägg till Java-versionsegenskaper om de inte finns
+    if ! grep -q "<maven.compiler.source>" "$POM_FILE"; then
+        sed -i "/<properties>/a \
+    <maven.compiler.source>$JAVA_VERSION</maven.compiler.source>\n\
+    <maven.compiler.target>$JAVA_VERSION</maven.compiler.target>\n\
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>" "$POM_FILE"
+    else
+        # Uppdatera befintliga Java-versionsegenskaper
+        sed -i "s/<maven.compiler.source>[0-9.]*<\/maven.compiler.source>/<maven.compiler.source>$JAVA_VERSION<\/maven.compiler.source>/g" "$POM_FILE"
+        sed -i "s/<maven.compiler.target>[0-9.]*<\/maven.compiler.target>/<maven.compiler.target>$JAVA_VERSION<\/maven.compiler.target>/g" "$POM_FILE"
+    fi
+else
+    # Lägg till properties-sektion om den inte finns
+    sed -i "/<\/modelVersion>/a \
+  <properties>\n\
+    <maven.compiler.source>$JAVA_VERSION</maven.compiler.source>\n\
+    <maven.compiler.target>$JAVA_VERSION</maven.compiler.target>\n\
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>\n\
+    <mainClass>$GROUP_ID.Main</mainClass>\n\
+  </properties>" "$POM_FILE"
+fi
+
+# Lägg till build-plugins för att skapa körbar JAR om de inte finns
+if ! grep -q "<build>" "$POM_FILE"; then
+    echo -e "${BLUE}Lägger till build-plugins i pom.xml...${NC}"
+    cat << EOF >> "$POM_FILE"
+  <build>
+    <plugins>
+      <!-- Maven Compiler Plugin -->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-compiler-plugin</artifactId>
+        <version>3.11.0</version>
+        <configuration>
+          <source>${JAVA_VERSION}</source>
+          <target>${JAVA_VERSION}</target>
+        </configuration>
+      </plugin>
+      <!-- Maven JAR Plugin -->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-jar-plugin</artifactId>
+        <version>3.3.0</version>
+        <configuration>
+          <archive>
+            <manifest>
+              <addClasspath>true</addClasspath>
+              <classpathPrefix>lib/</classpathPrefix>
+              <mainClass>${GROUP_ID}.Main</mainClass>
+            </manifest>
+          </archive>
+        </configuration>
+      </plugin>
+      <!-- Maven Surefire Plugin -->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-surefire-plugin</artifactId>
+        <version>3.2.2</version>
+      </plugin>
+    </plugins>
+  </build>
+</project>
+EOF
+    # Ta bort sista raden i filen (</project>) för att undvika duplicering
+    sed -i '$d' "$POM_FILE"
+fi
+
+# Skapa en förbättrad Makefile
+echo -e "${BLUE}Skapar Makefile...${NC}"
+
+# Använd enkelfnutna citattecken runt EOF för att förhindra att bash
+# försöker tolka Makefile-variablerna
+cat << 'EOF' > "$PROJECT_DIR/Makefile"
+# Makefile för maven-projektet
+
+# Variabler
+MVN := mvn
+JAVA := java
+MAIN_CLASS := GROUP_ID_PLACEHOLDER.Main
+JAR_FILE := target/ARTIFACT_ID_PLACEHOLDER-*.jar
+MAIN_CLASS_FILE := target/classes/$(shell echo $(MAIN_CLASS) | tr . /).class
+
+# ANSI färgkoder
+GREEN := \033[0;32m
+YELLOW := \033[1;33m
+NC := \033[0m
+
+# Mål
+.PHONY: all compile package run run-jar test clean install dependency-tree help
+
+all: run
+
+# Kompilera bara om klassfilen inte finns eller om källkoden är nyare
+compile: $(MAIN_CLASS_FILE)
+
+# Regel för att skapa klassfilen - körs bara om källkoden är nyare
+$(MAIN_CLASS_FILE): $(shell find src/main/java -name "*.java")
+	@echo "$(GREEN)Kompilerar projekt...$(NC)"
+	@$(MVN) compile
+
+package: $(MAIN_CLASS_FILE)
+	@echo "$(GREEN)Paketerar projekt...$(NC)"
+	@$(MVN) package
+
+# Kör programmet - kompilerar bara om nödvändigt
+run: $(MAIN_CLASS_FILE)
+	@echo "$(GREEN)Kör programmet...$(NC)"
+	@$(JAVA) -cp target/classes $(MAIN_CLASS)
+
+run-jar: package
+	@echo "$(GREEN)Kör från jar...$(NC)"
+	@$(JAVA) -jar $(JAR_FILE)
+
+test:
+	@echo "$(GREEN)Kör tester...$(NC)"
+	@$(MVN) test
+
+clean:
+	@echo "$(GREEN)Rensar projekt...$(NC)"
+	@$(MVN) clean
+
+install: $(MAIN_CLASS_FILE)
+	@echo "$(GREEN)Installerar till lokalt repository...$(NC)"
+	@$(MVN) install
+
+dependency-tree:
+	@echo "$(GREEN)Visar beroende-träd...$(NC)"
+	@$(MVN) dependency:tree
+
+help:
+	@echo "$(YELLOW)Tillgängliga mål:$(NC)"
+	@echo "  all            - Kompilera (om nödvändigt) och kör applikationen"
+	@echo "  compile        - Kompilera källkoden (endast om nödvändigt)"
+	@echo "  package        - Paketera den kompilerade koden till en JAR-fil"
+	@echo "  run            - Kör applikationen (kompilerar först om nödvändigt)"
+	@echo "  run-jar        - Kör applikationen från den paketerade JAR-filen"
+	@echo "  test           - Kör tester"
+	@echo "  clean          - Rensa projektet"
+	@echo "  install        - Installera paketet till det lokala repositoriet"
+	@echo "  dependency-tree - Visa beroendeträdet"
+EOF
+
+# Efter att Makefile har skapats ersätter vi platshållarna med de verkliga värdena
+sed -i "s/GROUP_ID_PLACEHOLDER/$GROUP_ID/" "$PROJECT_DIR/Makefile"
+sed -i "s/ARTIFACT_ID_PLACEHOLDER/$ARTIFACT_ID/" "$PROJECT_DIR/Makefile"
+
+# Skapa en README.md-fil
+echo -e "${BLUE}Skapar README.md...${NC}"
+cat << EOF > "$PROJECT_DIR/README.md"
+# $ARTIFACT_ID
+
+## Beskrivning
+Ett Java-projekt skapat med Maven.
+
+## Bygga och köra
+
+### Förutsättningar
+- Java $JAVA_VERSION eller högre
+- Maven 3.6 eller högre
+
+### Kommandon
+
+För att kompilera projektet:
+\`\`\`
+make compile
+\`\`\`
+
+För att köra applikationen:
+\`\`\`
+make run
+\`\`\`
+
+För att paketera applikationen:
+\`\`\`
+make package
+\`\`\`
+
+För att köra den paketerade applikationen:
+\`\`\`
+make run-jar
+\`\`\`
+
+För att rensa projektet:
+\`\`\`
+make clean
+\`\`\`
+
+För fler kommandon, kör:
+\`\`\`
+make help
+\`\`\`
+
+## Projektstruktur
+- \`src/main/java/\` - Java-källfiler
+- \`src/test/java/\` - Test-källfiler
+- \`target/\` - Kompilerade klasser och paket
+EOF
+
+# Skapa en grundläggande .gitignore-fil
+echo -e "${BLUE}Skapar .gitignore...${NC}"
+cat << EOF > "$PROJECT_DIR/.gitignore"
+# Maven
+target/
+pom.xml.tag
+pom.xml.releaseBackup
+pom.xml.versionsBackup
+pom.xml.next
+release.properties
+dependency-reduced-pom.xml
+buildNumber.properties
+.mvn/timing.properties
+.mvn/wrapper/maven-wrapper.jar
+
+# IDE-filer
+.idea/
+*.iml
+.classpath
+.project
+.settings/
+.vscode/
+*.code-workspace
+
+# Kompilerade klassfiler
+*.class
+
+# Loggfiler
+*.log
+
+# Paketfiler
+*.jar
+*.war
+*.nar
+*.ear
+*.zip
+*.tar.gz
+*.rar
+
+# macOS
+.DS_Store
+
+# Windows
+Thumbs.db
+Desktop.ini
+EOF
+
+# Initiera Git-repository om så önskas
+if [ "$INIT_GIT" = true ]; then
+    if command_exists git; then
+        echo -e "${BLUE}Initierar Git-repository...${NC}"
+        (cd "$PROJECT_DIR" && git init && git add . && git commit -m "Initial commit")
+    else
+        echo -e "${YELLOW}Git är inte installerat. Hoppar över Git-initiering.${NC}"
+    fi
+fi
+
+# Slutligt framgångsmeddelande
+echo -e "\n${GREEN}Projektuppläggning klar!${NC}"
+echo -e "${BLUE}För att komma igång:${NC}"
+echo -e "  cd $ARTIFACT_ID"
+echo -e "  make compile"
+echo -e "  make run"
+echo -e "\n${BLUE}För fler kommandon:${NC}"
+echo -e "  make help"

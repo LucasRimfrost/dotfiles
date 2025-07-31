@@ -1,0 +1,5 @@
+#!/usr/bin/env bash
+query=$(rofi -dmenu -p "🔍 Search" -theme pywal-modern)
+if [ -n "$query" ]; then
+    xdg-open "https://search.brave.com/search?q=$query"
+fi

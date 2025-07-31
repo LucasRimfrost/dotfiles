@@ -1,0 +1,56 @@
+/* ==========================================================================
+   File: pywal-modern.rasi
+   Desc: Modern pywal-based color theme for Rofi
+   Based on your pywal colors with modern styling
+   ========================================================================== */
+
+* {
+    /* Theme settings */
+    highlight: bold;
+    scrollbar: false;
+
+    /* Pywal colors */
+    pywal-bg:           #0B172B;
+    pywal-fg:           #aab0c3;
+    pywal-cursor:       #aab0c3;
+    pywal-color0:       #0B172B;
+    pywal-color1:       #A23B30;
+    pywal-color2:       #E56537;
+    pywal-color3:       #A35455;
+    pywal-color4:       #DB694C;
+    pywal-color5:       #F49E51;
+    pywal-color6:       #F7A748;
+    pywal-color7:       #aab0c3;
+    pywal-color8:       #767b88;
+
+    /* Modern theme colors */
+    background:                  @pywal-bg;
+    background-color:            @background;
+    foreground:                  @pywal-fg;
+    border-color:                @pywal-color8;
+    separatorcolor:              @pywal-color8;
+    scrollbar-handle:            @pywal-color8;
+
+    normal-background:           transparent;
+    normal-foreground:           @foreground;
+    alternate-normal-background: rgba(118, 123, 136, 0.1);
+    alternate-normal-foreground: @foreground;
+    selected-normal-background:  rgba(170, 176, 195, 0.15);
+    selected-normal-foreground:  @pywal-fg;
+
+    active-background:           @pywal-color5;
+    active-foreground:           @pywal-bg;
+    alternate-active-background: @active-background;
+    alternate-active-foreground: @active-foreground;
+    selected-active-background:  @pywal-color6;
+    selected-active-foreground:  @active-foreground;
+
+    urgent-background:           @pywal-color1;
+    urgent-foreground:           @pywal-fg;
+    alternate-urgent-background: @urgent-background;
+    alternate-urgent-foreground: @urgent-foreground;
+    selected-urgent-background:  @pywal-color2;
+    selected-urgent-foreground:  @urgent-foreground;
+}
+
+@import "pywal-modern-common"

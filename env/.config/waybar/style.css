@@ -1,0 +1,280 @@
+/* ============================================
+ * Modern Waybar Theme - Standalone (No Pywal)
+ * Compatible with GTK CSS
+ * ============================================ */
+
+/* -----------------------------------------------------
+ * COLOR VARIABLES - Edit these to change theme colors
+ * ----------------------------------------------------- */
+
+@define-color background #0B172B;
+@define-color foreground #aab0c3;
+@define-color cursor #aab0c3;
+@define-color color0 #0B172B;
+@define-color color1 #A23B30;
+@define-color color2 #E56537;
+@define-color color3 #A35455;
+@define-color color4 #DB694C;
+@define-color color5 #F49E51;
+@define-color color6 #F7A748;
+@define-color color7 #aab0c3;
+@define-color color8 #767b88;
+@define-color color9 #A23B30;
+@define-color color10 #E56537;
+@define-color color11 #A35455;
+@define-color color12 #DB694C;
+@define-color color13 #F49E51;
+@define-color color14 #F7A748;
+@define-color color15 #aab0c3;
+
+/* -----------------------------------------------------
+ * BASE STYLES
+ * ----------------------------------------------------- */
+
+* {
+    font-family: "JetBrains Mono Nerd Font", "Noto Sans", sans-serif;
+    font-size: 14px;
+    font-weight: 500;
+    min-height: 0;
+    border: none;
+    border-radius: 0px;
+}
+
+window#waybar {
+    background: transparent;
+    color: @foreground;
+}
+
+window#waybar.hidden {
+    opacity: 0;
+}
+
+/* -----------------------------------------------------
+ * WORKSPACE & TASKBAR MANAGEMENT
+ * ----------------------------------------------------- */
+
+#workspaces {
+    background: transparent;
+    margin-left: 8px;
+    padding: 0px;
+    border: none;
+    border-radius: 0px;
+}
+
+#workspaces button {
+    padding: 1px;
+    margin-left: 1px;
+    background: transparent;
+    color: alpha(@foreground, 0.5);
+    font-weight: normal;
+}
+
+#workspaces button.active {
+    background: transparent;
+    color: @foreground;
+    font-weight: bold;
+}
+
+#taskbar {
+    background: transparent;
+}
+
+#taskbar button {
+    background: transparent;
+    margin: 2px 2px;
+    padding: 1px 2px;
+    border-bottom: 2px solid alpha(@foreground, 0.3);
+    color: @foreground;
+}
+
+#taskbar button.active {
+    border-bottom: 2px solid alpha(@foreground, 1.0);
+}
+
+#taskbar.empty {
+    background: transparent;
+    border: 0;
+    padding: 0;
+    margin: 0;
+}
+
+/* -----------------------------------------------------
+ * SYSTEM INFORMATION MODULES
+ * ----------------------------------------------------- */
+
+#cpu,
+#memory,
+#disk {
+    background: transparent;
+    font-size: 11px;
+    font-weight: bold;
+    padding: 0px 2px;
+    opacity: 0.9;
+    transition: all 0.3s ease-in-out;
+    color: @foreground;
+}
+
+#cpu:hover,
+#memory:hover,
+#disk:hover {
+    color: @color1;
+}
+
+/* -----------------------------------------------------
+ * HARDWARE STATUS MODULES
+ * ----------------------------------------------------- */
+
+#wireplumber,
+#battery,
+#network,
+#bluetooth {
+    background: alpha(@foreground, 0.9);
+    font-size: 11px;
+    font-weight: bold;
+    padding: 0px 4px;
+    margin-right: 8px;
+    border-radius: 12px;
+    opacity: 0.9;
+    min-width: 40px;
+    transition: all 0.3s ease-in-out;
+    color: @background;
+}
+
+#wireplumber:hover,
+#battery:hover,
+#network:hover,
+#bluetooth:hover {
+    color: @color1;
+}
+
+/* Hardware Module State Variations */
+#wireplumber.muted {
+    color: alpha(@background, 0.5);
+}
+
+#battery.charging,
+#battery.plugged {
+    color: @background;
+}
+
+#battery.critical:not(.charging) {
+    color: @color1;
+    animation: pulse 1s ease-in-out infinite alternate;
+}
+
+#network.disconnected {
+    color: alpha(@background, 0.6);
+}
+
+/* Hardware Module Animations */
+@keyframes pulse {
+    from {
+        color: alpha(@background, 0.9);
+    }
+    to {
+        color: alpha(@color1, 0.2);
+    }
+}
+
+/* -----------------------------------------------------
+ * HARDWARE GROUPS
+ * ----------------------------------------------------- */
+
+#group-tools {
+    background: alpha(@background, 0.9);
+    opacity: 0.9;
+}
+
+#group-tools > *:not(:last-child) {
+    margin-right: 8px;
+}
+
+/* -----------------------------------------------------
+ * UI ELEMENTS & CONTROLS
+ * ----------------------------------------------------- */
+
+#clock {
+    background: transparent;
+    font-size: 11px;
+    font-weight: bold;
+    transition: all 0.3s ease-in-out;
+    opacity: 0.9;
+}
+
+#clock:hover {
+    color: @color1;
+}
+
+#custom-exit,
+#custom-updates {
+    background: transparent;
+    color: @foreground;
+    transition: all 0.3s ease-in-out;
+    opacity: 0.9;
+}
+
+#custom-exit:hover,
+#custom-updates:hover {
+    color: @color1;
+}
+
+/* UI Element Variations */
+#custom-exit {
+    font-size: 18px;
+    margin-right: 16px;
+}
+
+#custom-updates {
+    font-size: 14px;
+    margin-right: 18px;
+}
+
+/* Update Status Colors */
+#custom-updates.green {
+    color: @foreground;
+}
+
+#custom-updates.yellow {
+    color: @color6;
+}
+
+#custom-updates.red {
+    color: @color1;
+}
+
+/* -----------------------------------------------------
+ * SYSTEM TRAY
+ * ----------------------------------------------------- */
+
+#tray {
+    background: alpha(@background, 0.9);
+    padding: 0px 6px;
+    margin: 1px 3px;
+    border-radius: 15px;
+    opacity: 0.9;
+}
+
+#tray > .passive {
+    -gtk-icon-effect: dim;
+}
+
+#tray > .needs-attention {
+    -gtk-icon-effect: highlight;
+    color: @color1;
+}
+
+/* -----------------------------------------------------
+ * TOOLTIPS
+ * ----------------------------------------------------- */
+
+tooltip {
+    background: alpha(@background, 0.95);
+    border: 1px solid alpha(@foreground, 0.3);
+    border-radius: 8px;
+    box-shadow: 0 4px 12px alpha(@background, 0.8);
+}
+
+tooltip label {
+    color: @foreground;
+    font-size: 10px;
+}

@@ -1,0 +1,84 @@
+################
+### TERMINAL ###
+################
+[terminal]
+shell = { program = "/bin/zsh" }
+osc52 = "Disabled"
+
+##############
+### WINDOW ###
+##############
+[window]
+padding = { x = 4, y = 0 }
+dynamic_padding = false
+opacity = 1.0
+dynamic_title = false
+decorations = "None"
+startup_mode = "Windowed"
+
+#################
+### SCROLLING ###
+#################
+[scrolling]
+history = 5000
+multiplier = 5
+
+############
+### FONT ###
+############
+[font]
+normal = { family = "JetBrains Mono Nerd Font", style = "Regular" }
+bold = { family = "JetBrains Mono Nerd Font", style = "Bold" }
+italic = { family = "JetBrains Mono Nerd Font", style = "Italic" }
+bold_italic = { family = "JetBrains Mono Nerd Font", style = "Bold Italic" }
+size = 14.0
+builtin_box_drawing = true
+
+##############
+### COLORS ###
+##############
+[colors]
+transparent_background_colors = true
+
+# Pywal Generated Colors - Your actual GTA wallpaper colors
+[colors.primary]
+background = "#0B172B"  # Your actual background
+foreground = "#aab0c3"  # Your actual foreground
+
+[colors.cursor]
+text = "#0B172B"        # Same as background
+cursor = "#A23B30"      # Your color1 (dark red)
+
+[colors.normal]
+black   = "#0B172B"     # color0
+red     = "#A23B30"     # color1 (dark red)
+green   = "#E56537"     # color2 (orange)
+yellow  = "#A35455"     # color3 (brownish)
+blue    = "#DB694C"     # color4 (red-orange)
+magenta = "#F49E51"     # color5 (orange-yellow)
+cyan    = "#F7A748"     # color6 (bright orange)
+white   = "#aab0c3"     # color7 (light blue-gray)
+
+[colors.bright]
+black   = "#767b88"     # color8 (darker gray)
+red     = "#A23B30"     # color9 (same as color1)
+green   = "#E56537"     # color10 (same as color2)
+yellow  = "#A35455"     # color11 (same as color3)
+blue    = "#DB694C"     # color12 (same as color4)
+magenta = "#F49E51"     # color13 (same as color5)
+cyan    = "#F7A748"     # color14 (same as color6)
+white   = "#aab0c3"     # color15 (same as color7)
+
+##############
+### CURSOR ###
+##############
+[cursor]
+style = { shape = "Block", blinking = "Never" }
+unfocused_hollow = true
+thickness = 0.2
+
+#############
+### MOUSE ###
+#############
+[mouse]
+hide_when_typing = true

@@ -1,0 +1,213 @@
+# Dunst Configuration with Custom Pywal Colors
+# Place this in ~/.config/dunst/dunstrc
+#
+# Color Coding System:
+# - White/Foreground (#aab0c366): Normal, low priority, and info notifications
+# - Yellow (#F7A748): Warning notifications (battery low, system alerts)
+# - Red (#A23B30): Critical notifications (battery critical, urgent alerts)
+
+[global]
+    ### Display ###
+    monitor = 0
+    follow = mouse
+
+    ### Geometry ###
+    width = (300, 400)
+    height = (0, 200)
+    origin = top-center
+    offset = (15, 50)
+    scale = 0
+    notification_limit = 20
+
+    ### Progress bar ###
+    progress_bar = true
+    progress_bar_height = 6
+    progress_bar_frame_width = 0
+    progress_bar_min_width = 150
+    progress_bar_max_width = 300
+    progress_bar_corner_radius = 3
+    # Using foreground color with 40% opacity to match borders
+    highlight = "#aab0c366"
+
+    ### Shape ###
+    corner_radius = 10
+    transparency = 20
+    gap_size = 8
+    separator_height = 2
+    padding = 12
+    horizontal_padding = 12
+    text_icon_padding = 15
+    frame_width = 2
+
+    ### Colors ###
+    # Using foreground color with 40% opacity to match Hyprland active borders
+    frame_color = "#aab0c366"
+    separator_color = "#aab0c366"
+
+    ### Text ###
+    font = "JetBrains Mono Nerd Font 11"
+    line_height = 0
+    markup = full
+    format = "<b>%s</b>\n%b"
+    alignment = left
+    vertical_alignment = center
+    show_age_threshold = 60
+    ellipsize = middle
+    ignore_newline = no
+    stack_duplicates = true
+    hide_duplicate_count = false
+    show_indicators = yes
+
+    ### Icons ###
+    enable_recursive_icon_lookup = true
+    icon_position = left
+    min_icon_size = 32
+    max_icon_size = 64
+    icon_theme = "Papirus-Dark"
+
+    ### History ###
+    sticky_history = yes
+    history_length = 100
+
+    ### Misc/Advanced ###
+    dmenu = /usr/bin/wofi --show dmenu -p dunst
+    browser = /usr/bin/firefox -new-tab
+    always_run_script = true
+    title = Dunst
+    class = Dunst
+
+    ### Mouse ###
+    mouse_left_click = close_current
+    mouse_middle_click = do_action, close_current
+    mouse_right_click = close_all
+
+# Urgency levels with logical color coding
+[urgency_low]
+    background = "#0B172BD9"  # background with 85% opacity
+    foreground = "#aab0c3"    # foreground color
+    frame_color = "#aab0c366" # normal white/foreground for low priority
+    timeout = 8
+
+[urgency_normal]
+    background = "#0B172BD9"  # background with 85% opacity
+    foreground = "#aab0c3"    # foreground color
+    frame_color = "#aab0c366" # normal white/foreground for normal
+    timeout = 10
+
+[urgency_critical]
+    background = "#0B172BD9"  # background with 85% opacity
+    foreground = "#aab0c3"    # foreground color
+    frame_color = "#A23B30"   # red (color1) for critical alerts
+    highlight = "#A23B30"     # red highlight for critical
+    timeout = 0
+
+# App-specific styling with logical color coding
+[spotify]
+    appname = Spotify
+    format = "<b>Now Playing</b>\n%s\n%b"
+    background = "#0B172BD9"
+    foreground = "#aab0c3"
+    frame_color = "#aab0c366" # normal white for info
+    highlight = "#F7A748"     # color6 for accent
+    timeout = 5
+
+[volume]
+    appname = Volume
+    format = "<b>%s</b>"
+    background = "#0B172BD9"
+    foreground = "#aab0c3"
+    frame_color = "#aab0c366" # normal white for info
+    highlight = "#DB694C"     # color4 for accent
+    timeout = 3
+
+[brightness]
+    appname = Brightness
+    format = "<b>%s</b>"
+    background = "#0B172BD9"
+    foreground = "#aab0c3"
+    frame_color = "#aab0c366" # normal white for info
+    highlight = "#F49E51"     # color5 for accent
+    timeout = 3
+
+# Notification type rules with logical color coding
+[notification-battery-low]
+    summary = "*Battery*"
+    background = "#0B172BD9"
+    foreground = "#aab0c3"
+    frame_color = "#F7A748"   # yellow (color6) for warning
+    highlight = "#F7A748"
+    timeout = 0
+
+[notification-battery-critical]
+    summary = "*Battery*"
+    body = "*critically low*"
+    background = "#0B172BD9"
+    foreground = "#aab0c3"
+    frame_color = "#A23B30"   # red (color1) for critical
+    highlight = "#A23B30"
+    timeout = 0
+
+[notification-network]
+    summary = "*Network*"
+    background = "#0B172BD9"
+    foreground = "#aab0c3"
+    frame_color = "#aab0c366" # normal white for info
+    highlight = "#E56537"     # color2 for accent
+    timeout = 5
+
+[notification-wifi]
+    summary = "*WiFi*"
+    background = "#0B172BD9"
+    foreground = "#aab0c3"
+    frame_color = "#aab0c366" # normal white for info
+    highlight = "#E56537"     # color2 for accent
+    timeout = 5
+
+[notification-screenshot]
+    summary = "*Screenshot*"
+    background = "#0B172BD9"
+    foreground = "#aab0c3"
+    frame_color = "#aab0c366" # normal white for info
+    highlight = "#F49E51"     # color5 for accent
+    timeout = 3
+
+[notification-media]
+    summary = "*Media*"
+    background = "#0B172BD9"
+    foreground = "#aab0c3"
+    frame_color = "#aab0c366" # normal white for info
+    highlight = "#F7A748"     # color6 for accent
+    timeout = 4
+
+[notification-system]
+    summary = "*System*"
+    background = "#0B172BD9"
+    foreground = "#aab0c3"
+    frame_color = "#F7A748"   # yellow (color6) for system warnings
+    highlight = "#F7A748"
+    timeout = 5
+
+# Additional notification rules for better error identification
+[notification-error]
+    summary = "*Error*"
+    background = "#0B172BD9"
+    foreground = "#aab0c3"
+    frame_color = "#A23B30"   # red (color1) for errors
+    highlight = "#A23B30"
+    timeout = 0
+
+[notification-warning]
+    summary = "*Warning*"
+    background = "#0B172BD9"
+    foreground = "#aab0c3"
+    frame_color = "#F7A748"   # yellow (color6) for warnings
+    highlight = "#F7A748"
+    timeout = 8
+
+[notification-disk-space]
+    summary = "*Disk*"
+    background = "#0B172BD9"
+    foreground = "#aab0c3"
+    frame_color = "#F7A748"   # yellow (color6) for disk warnings
+    highlight = "#F7A748"
+    timeout = 10

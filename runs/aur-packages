@@ -1,0 +1,10 @@
+#!/usr/bin/env bash
+
+# Ensure paru is installed first
+if ! command -v paru &> /dev/null; then
+  echo "Installing paru first..."
+  ~/.dotfiles/runs/paru
+fi
+
+# Install commonly used AUR packages
+paru -S --noconfirm --needed bluetuith hyprshot hyprpicker-git brave-bin

@@ -1,0 +1,229 @@
+#!/usr/bin/env bash
+
+# UFW Firewall Setup Script for Arch Linux
+# Configures a secure firewall setup optimized for laptop use
+
+set -e  # Exit on any error
+
+echo "Setting up UFW Firewall for secure laptop usage..."
+
+# Colors for output
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+YELLOW='\033[1;33m'
+BLUE='\033[0;34m'
+NC='\033[0m' # No Color
+
+print_status() {
+    echo -e "${BLUE}[INFO]${NC} $1"
+}
+
+print_success() {
+    echo -e "${GREEN}[SUCCESS]${NC} $1"
+}
+
+print_warning() {
+    echo -e "${YELLOW}[WARNING]${NC} $1"
+}
+
+print_error() {
+    echo -e "${RED}[ERROR]${NC} $1"
+}
+
+# Check if running as root
+if [[ $EUID -eq 0 ]]; then
+    print_error "This script should not be run as root!"
+    print_status "Run it as your regular user - it will use sudo when needed."
+    exit 1
+fi
+
+# Check if sudo is available
+if ! command -v sudo &> /dev/null; then
+    print_error "sudo is required but not installed. Please install sudo first."
+    exit 1
+fi
+
+print_status "Installing UFW firewall..."
+sudo pacman -S --needed --noconfirm ufw
+
+print_status "Stopping conflicting firewall services..."
+# Stop and disable conflicting services if they exist
+sudo systemctl stop firewalld.service 2>/dev/null || true
+sudo systemctl disable firewalld.service 2>/dev/null || true
+sudo systemctl stop iptables.service 2>/dev/null || true
+sudo systemctl disable iptables.service 2>/dev/null || true
+sudo systemctl stop ip6tables.service 2>/dev/null || true
+sudo systemctl disable ip6tables.service 2>/dev/null || true
+
+print_status "Configuring UFW with secure defaults..."
+
+# Reset UFW to clean state
+sudo ufw --force reset
+
+# Set secure default policies
+print_status "Setting default policies (deny incoming, allow outgoing)..."
+sudo ufw default deny incoming
+sudo ufw default allow outgoing
+
+print_status "Configuring essential service rules..."
+
+# Allow essential outgoing services explicitly
+sudo ufw allow out 53/udp comment 'DNS queries'
+sudo ufw allow out 53/tcp comment 'DNS over TCP'
+sudo ufw allow out 123/udp comment 'NTP time synchronization'
+sudo ufw allow out 80/tcp comment 'HTTP web traffic'
+sudo ufw allow out 443/tcp comment 'HTTPS web traffic'
+
+# Allow SSH with rate limiting (6 connections per 30 seconds)
+print_status "Enabling rate-limited SSH access..."
+sudo ufw limit ssh comment 'SSH with rate limiting'
+
+# Allow common laptop services (user can disable if not needed)
+print_status "Enabling common laptop services..."
+
+# DHCP client (for getting IP addresses)
+sudo ufw allow out 67/udp comment 'DHCP client requests'
+sudo ufw allow out 68/udp comment 'DHCP client responses'
+
+# Allow local network discovery and printing (can be disabled for public networks)
+print_warning "Enabling local network services (disable on untrusted networks):"
+sudo ufw allow in on lo comment 'Allow localhost traffic'
+sudo ufw allow out on lo comment 'Allow localhost traffic'
+
+# Multicast DNS for local service discovery
+sudo ufw allow out 5353/udp comment 'mDNS service discovery'
+
+# Network printer discovery
+sudo ufw allow out 631/udp comment 'IPP printer discovery'
+
+# Optional: KDE Connect (uncomment if you use it)
+# sudo ufw allow 1714:1764/tcp comment 'KDE Connect TCP'
+# sudo ufw allow 1714:1764/udp comment 'KDE Connect UDP'
+
+print_status "Configuring logging..."
+# Enable logging at low level (change to 'medium' or 'high' if needed)
+sudo ufw logging low
+
+print_status "Creating UFW application profiles directory..."
+sudo mkdir -p /etc/ufw/applications.d
+
+print_status "Creating custom application profiles..."
+# Create a custom applications file for common services
+sudo tee /etc/ufw/applications.d/custom > /dev/null << 'EOF'
+[KDE Connect]
+title=KDE Connect
+description=KDE Connect for device synchronization
+ports=1714:1764/tcp|1714:1764/udp
+
+[Syncthing]
+title=Syncthing
+description=Syncthing file synchronization
+ports=8384/tcp|22000/tcp|22000/udp|21027/udp
+
+[qBittorrent]
+title=qBittorrent
+description=qBittorrent BitTorrent client
+ports=8080/tcp|6881/tcp|6881/udp
+
+[Deluge]
+title=Deluge
+description=Deluge BitTorrent client
+ports=58846/tcp|58946/tcp
+
+[Development]
+title=Development Server
+description=Common development server ports
+ports=3000/tcp|8000/tcp|8080/tcp|9000/tcp
+EOF
+
+print_status "Enabling UFW firewall..."
+# Enable UFW
+sudo ufw --force enable
+
+print_status "Enabling UFW service to start at boot..."
+sudo systemctl enable ufw.service
+
+# Verify UFW is running
+sleep 2
+
+print_status "Verifying firewall status..."
+if systemctl is-active --quiet ufw.service; then
+    print_success "UFW service is running"
+else
+    print_error "UFW service failed to start"
+    exit 1
+fi
+
+if sudo ufw status | grep -q "Status: active"; then
+    print_success "UFW firewall is active and configured"
+else
+    print_error "UFW firewall is not active"
+    exit 1
+fi
+
+print_success "UFW Firewall setup completed successfully!"
+
+echo ""
+print_status "CURRENT FIREWALL STATUS:"
+sudo ufw status verbose
+
+echo ""
+print_status "USEFUL UFW COMMANDS:"
+echo "Basic Management:"
+echo "• Check status: sudo ufw status verbose"
+echo "• Enable firewall: sudo ufw enable"
+echo "• Disable firewall: sudo ufw disable"
+echo "• Reset all rules: sudo ufw --force reset"
+
+echo ""
+echo "Allow Services:"
+echo "• Allow SSH: sudo ufw allow ssh"
+echo "• Allow HTTP: sudo ufw allow http"
+echo "• Allow HTTPS: sudo ufw allow https"
+echo "• Allow custom app: sudo ufw allow 'KDE Connect'"
+
+echo ""
+echo "Allow Ports:"
+echo "• Allow specific port: sudo ufw allow 8080/tcp"
+echo "• Allow port range: sudo ufw allow 6000:6010/tcp"
+echo "• Allow from IP: sudo ufw allow from 192.168.1.100"
+
+echo ""
+echo "Rate Limiting:"
+echo "• Limit SSH: sudo ufw limit ssh"
+echo "• Limit port: sudo ufw limit 80/tcp"
+
+echo ""
+echo "Remove Rules:"
+echo "• List numbered rules: sudo ufw status numbered"
+echo "• Delete by number: sudo ufw delete 3"
+echo "• Remove rule: sudo ufw delete allow ssh"
+
+echo ""
+echo "Advanced:"
+echo "• Show listening ports: sudo ss -tulpn"
+echo "• View UFW logs: sudo journalctl -u ufw -f"
+echo "• Show application list: sudo ufw app list"
+
+echo ""
+print_warning "SECURITY RECOMMENDATIONS:"
+echo "• For public WiFi: Consider disabling mDNS and printer discovery"
+echo "• Monitor logs regularly: sudo journalctl -u ufw --since today"
+echo "• Review rules periodically: sudo ufw status numbered"
+echo "• Use rate limiting for public services: sudo ufw limit <service>"
+
+echo ""
+print_status "QUICK SECURITY PROFILES:"
+echo ""
+echo "For PUBLIC/UNTRUSTED networks (coffee shops, hotels):"
+echo "sudo ufw deny out 5353/udp  # Disable mDNS"
+echo "sudo ufw deny out 631/udp   # Disable printer discovery"
+echo ""
+echo "For HOME/TRUSTED networks:"
+echo "sudo ufw allow out 5353/udp  # Enable mDNS"
+echo "sudo ufw allow out 631/udp   # Enable printer discovery"
+echo "sudo ufw allow 'KDE Connect' # Enable device sync"
+
+echo ""
+print_success "Your laptop is now protected by UFW firewall!"
+print_status "Reboot recommended to ensure all services start properly."

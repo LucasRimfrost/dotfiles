@@ -1,0 +1,18 @@
+#!/usr/bin/env bash
+
+# Check if paru is already installed
+if command -v paru &> /dev/null; then
+  echo "paru is already installed"
+  exit 0
+fi
+
+# Install paru from AUR
+echo "Installing paru from AUR..."
+cd /tmp
+git clone https://aur.archlinux.org/paru.git
+cd paru
+makepkg -si --needed --noconfirm
+cd ~
+rm -rf /tmp/paru
+
+echo "paru installation complete!"

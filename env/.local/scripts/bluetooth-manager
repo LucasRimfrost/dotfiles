@@ -1,0 +1,77 @@
+#!/bin/bash
+# Bluetooth Manager - Clean Production Version
+
+LOG_FILE="/tmp/bluetooth-manager.log"
+
+log() {
+    echo "[$(date '+%Y-%m-%d %H:%M:%S')] $1" | tee -a "$LOG_FILE"
+}
+
+log "=== Bluetooth Manager Started ==="
+
+# Unblock and power on Bluetooth
+log "Enabling Bluetooth..."
+rfkill unblock bluetooth
+rfkill unblock 0 2>/dev/null || true
+sleep 2
+bluetoothctl power on
+sleep 1
+
+# Launch bluetuith
+log "Opening bluetuith..."
+bluetuith
+
+# When bluetuith closes, check for connected devices
+log "bluetuith closed, checking for connected devices..."
+
+connected_devices=()
+while IFS= read -r line; do
+    device_mac=$(echo "$line" | cut -d' ' -f2)
+    if bluetoothctl info "$device_mac" 2>/dev/null | grep -q "Connected: yes"; then
+        device_name=$(echo "$line" | cut -d' ' -f3-)
+        log "Found connected device: $device_name ($device_mac)"
+        connected_devices+=("$device_mac")
+    fi
+done < <(bluetoothctl devices)
+
+# Handle connected devices
+if [ ${#connected_devices[@]} -gt 0 ]; then
+    log "Starting background monitors for ${#connected_devices[@]} device(s)"
+
+    for device_mac in "${connected_devices[@]}"; do
+        log "Starting monitor for: $device_mac"
+
+        # Use setsid for reliable process independence
+        if command -v setsid >/dev/null; then
+            setsid ~/.local/bin/bluetooth-device-monitor.sh "$device_mac" >/dev/null 2>&1 &
+            log "Monitor started successfully for $device_mac"
+        else
+            # Fallback method
+            (
+                exec ~/.local/bin/bluetooth-device-monitor.sh "$device_mac" >/dev/null 2>&1
+            ) &
+            disown
+            log "Monitor started (fallback method) for $device_mac"
+        fi
+    done
+
+    # Brief pause to let monitors initialize
+    sleep 2
+
+    # Verify monitors are running
+    active_monitors=$(pgrep -cf bluetooth-device-monitor)
+    log "Active monitors confirmed: $active_monitors/${#connected_devices[@]}"
+
+    if [ "$active_monitors" -eq "${#connected_devices[@]}" ]; then
+        log "All monitors started successfully. Main script exiting."
+    else
+        log "WARNING: Not all monitors started ($active_monitors/${#connected_devices[@]})"
+    fi
+
+else
+    log "No connected devices. Disabling Bluetooth..."
+    bluetoothctl power off
+    log "Bluetooth disabled."
+fi
+
+log "=== Bluetooth Manager Completed ==="

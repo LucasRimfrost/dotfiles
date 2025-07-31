@@ -1,0 +1,40 @@
+#!/bin/bash
+
+set -e
+
+echo "Installing programming languages..."
+
+# Update package database
+echo "Updating package database..."
+sudo pacman -Sy
+
+# Install C/C++
+echo "Installing C/C++ (GCC toolchain)..."
+sudo pacman -S --noconfirm --needed base-devel gcc gdb
+
+# Install Java
+echo "Installing Java (Temurin 21 JDK)..."
+sudo pacman -S --noconfirm --needed temurin-21-jdk maven gradle
+
+# Install Python
+echo "Installing Python..."
+sudo pacman -S --noconfirm --needed python python-pip
+
+# Install Go
+echo "Installing Go..."
+sudo pacman -S --noconfirm --needed go
+
+# Install Rust
+echo "Installing Rust..."
+sudo pacman -S --noconfirm --needed rustup
+rustup default stable
+rustup component add clippy
+
+echo "All programming languages installed successfully!"
+echo ""
+echo "Installed languages:"
+echo "- C/C++: $(gcc --version | head -1)"
+echo "- Java: $(java --version | head -1)"
+echo "- Python: $(python --version)"
+echo "- Go: $(go version)"
+echo "- Rust: $(rustc --version)"
