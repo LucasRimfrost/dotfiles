@@ -14,7 +14,7 @@ sudo pacman -S --noconfirm --needed base-devel gcc gdb
 
 # Install Java
 echo "Installing Java (Temurin 21 JDK)..."
-sudo pacman -S --noconfirm --needed temurin-21-jdk maven gradle
+paru -S --noconfirm --needed jdk21-temurin maven gradle
 
 # Install Python
 echo "Installing Python..."
