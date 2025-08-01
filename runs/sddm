@@ -1,5 +1,4 @@
 #!/usr/bin/env bash
-
 script_dir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
 
 # Install SDDM and theme
@@ -30,5 +29,21 @@ sudo tee /etc/sddm.conf.d/10-wayland.conf > /dev/null <<EOF
 DisplayServer=wayland
 EOF
 
+# Disable other display managers if they exist
+echo "Disabling conflicting display managers..."
+sudo systemctl disable gdm 2>/dev/null || true
+sudo systemctl disable lightdm 2>/dev/null || true
+sudo systemctl disable lxdm 2>/dev/null || true
+sudo systemctl disable xdm 2>/dev/null || true
+
+# Enable SDDM service for next boot
+echo "Enabling SDDM service for boot..."
+sudo systemctl enable sddm
+
+# Set graphical boot target
+echo "Setting graphical boot target..."
+sudo systemctl set-default graphical.target
+
 echo "SDDM installation and configuration complete!"
-echo "Don't forget to enable it: sudo systemctl enable sddm"
+echo "SDDM is now enabled and will start on next boot."
+echo "Reboot your system to see the Sugar-Candy login screen."
