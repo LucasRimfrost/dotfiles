@@ -20,49 +20,25 @@ log() {
     fi
 }
 log "env: $DEV_ENV"
-
 update_files() {
     log "copying over files from: $1"
     pushd $1 &> /dev/null
     (
-        configs=`find . -mindepth 1 -maxdepth 1 -type d`
+        configs=find . -mindepth 1 -maxdepth 1 -type d
         for c in $configs; do
-            config_name=${c#./}
-
-            # Special handling for sddm.conf.d - copy to /etc instead of ~/.config
-            if [[ "$config_name" == "sddm.conf.d" ]]; then
-                directory="/etc/${config_name}"
-                log "    [SYSTEM] removing: sudo rm -rf $directory"
-                if [[ $dry_run == "0" ]]; then
-                    sudo rm -rf $directory
-                fi
-                log "    [SYSTEM] creating directory: sudo mkdir -p /etc"
-                if [[ $dry_run == "0" ]]; then
-                    sudo mkdir -p /etc
-                fi
-                log "    [SYSTEM] copying env: sudo cp -r $c /etc/"
-                if [[ $dry_run == "0" ]]; then
-                    sudo cp -r ./$c /etc/
-                    # Set proper ownership for system files
-                    sudo chown -R root:root $directory
-                fi
-            else
-                # Standard user config handling
-                directory=${2%/}/${config_name}
-                log "    removing: rm -rf $directory"
-                if [[ $dry_run == "0" ]]; then
-                    rm -rf $directory
-                fi
-                log "    copying env: cp $c $2"
-                if [[ $dry_run == "0" ]]; then
-                    cp -r ./$c $2
-                fi
+            directory=${2%/}/${c#./}
+            log "    removing: rm -rf $directory"
+            if [[ $dry_run == "0" ]]; then
+                rm -rf $directory
+            fi
+            log "    copying env: cp $c $2"
+            if [[ $dry_run == "0" ]]; then
+                cp -r ./$c $2
             fi
         done
     )
     popd &> /dev/null
 }
-
 copy() {
     log "removing: $2"
     if [[ $dry_run == "0" ]]; then
@@ -73,7 +49,6 @@ copy() {
         cp $1 $2
     fi
 }
-
 update_files $DEV_ENV/env/.config $XDG_CONFIG_HOME
 update_files $DEV_ENV/env/.local $HOME/.local
 copy $DEV_ENV/env/.zshrc $HOME/.zshrc
