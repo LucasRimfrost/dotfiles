@@ -37,7 +37,10 @@ sudo pacman -S --noconfirm --needed \
 # File manager and basic utilities
 echo "Installing file management essentials..."
 sudo pacman -S --noconfirm --needed \
-    pcmanfm \
+    thunar \
+    thunar-volman \
+    thunar-archive-plugin \
+    thunar-media-tags-plugin \
     gvfs
 
 # Network management
@@ -78,6 +81,12 @@ sudo pacman -S --noconfirm --needed \
     unzip \
     htop \
     tree
+
+echo "Installing GTK Themes"
+sudo pacman -S --noconfirm --needed \
+    gtk3 \
+    gtk4 \
+    gnome-themes-extra
 
 # Power management essentials
 echo "Installing power management..."
