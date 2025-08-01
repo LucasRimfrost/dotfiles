@@ -1,0 +1,103 @@
+#!/usr/bin/env bash
+
+set -e
+
+echo "Installing essential packages for Wayland/Hyprland..."
+
+# Update package database
+echo "Updating package database..."
+sudo pacman -Sy
+
+# Essential Wayland/compositor packages
+echo "Installing Wayland essentials..."
+sudo pacman -S --noconfirm --needed \
+    wayland \
+    wayland-protocols \
+    wlroots \
+    xdg-desktop-portal \
+    xdg-desktop-portal-wlr \
+    xdg-utils
+
+# Audio system (essential for desktop use)
+echo "Installing audio system..."
+sudo pacman -S --noconfirm --needed \
+    pipewire \
+    pipewire-pulse \
+    pipewire-alsa \
+    wireplumber \
+    pavucontrol
+
+# Display and graphics essentials
+echo "Installing graphics essentials..."
+sudo pacman -S --noconfirm --needed \
+    mesa \
+    vulkan-icd-loader
+
+# File manager and basic utilities
+echo "Installing file management essentials..."
+sudo pacman -S --noconfirm --needed \
+    pcmanfm \
+    gvfs \
+    gvfs-mtp
+
+# Network management
+echo "Installing network essentials..."
+sudo pacman -S --noconfirm --needed \
+    networkmanager \
+    nm-connection-editor
+
+# Essential fonts
+echo "Installing essential fonts..."
+sudo pacman -S --noconfirm --needed \
+    ttf-dejavu \
+    ttf-liberation \
+    noto-fonts
+
+# Clipboard management for Wayland
+echo "Installing clipboard manager..."
+sudo pacman -S --noconfirm --needed \
+    wl-clipboard
+
+# Essential system utilities
+echo "Installing system utilities..."
+sudo pacman -S --noconfirm --needed \
+    polkit \
+    polkit-gnome
+
+# Package management - Flatpak
+echo "Installing Flatpak..."
+sudo pacman -S --noconfirm --needed \
+    flatpak
+
+# Terminal and system monitoring
+echo "Installing terminal and monitoring tools..."
+sudo pacman -S --noconfirm --needed \
+    git \
+    curl \
+    wget \
+    unzip \
+    htop \
+    tree
+
+# Enable Flatpak Flathub repository
+echo "Enabling Flathub repository..."
+flatpak remote-add --if-not-exists flathub https://dl.flathub.org/repo/flathub.flatpakrepo
+
+# Install Mission Center from Flatpak
+echo "Installing Mission Center from Flatpak..."
+flatpak install -y flathub io.missioncenter.MissionCenter
+
+echo "Essential packages installed successfully!"
+echo ""
+echo "Installed essentials:"
+echo "- Wayland core and protocols"
+echo "- Audio system (PipeWire + pavucontrol)"
+echo "- Graphics drivers (Mesa)"
+echo "- File manager (PCManFM - lightweight)"
+echo "- Network management (NetworkManager)"
+echo "- Essential fonts"
+echo "- Clipboard manager (wl-clipboard)"
+echo "- System policies (Polkit)"
+echo "- Package management (Flatpak)"
+echo "- System monitoring (Mission Center via Flatpak)"
+echo "- Basic system tools (git, curl, wget, htop, tree)"

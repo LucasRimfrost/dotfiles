@@ -1,0 +1,111 @@
+# ═══════════════════════════════════════════════════════════════════════════════
+# Dotfiles Repository .gitignore
+# ═══════════════════════════════════════════════════════════════════════════════
+
+# ─── IDE and Editor Files ────────────────────────────────────────────────────
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
+
+# ─── Claude Code Assistant ───────────────────────────────────────────────────
+.claude/
+CLAUDE.md
+
+# ─── System Files ────────────────────────────────────────────────────────────
+*.log
+*.tmp
+*.temp
+.cache/
+.local/state/
+node_modules/
+
+# ─── Backup Files ─────────────────────────────────────────────────────────────
+*.bak
+*.backup
+*.orig
+*.old
+*~
+
+# ─── Generated Files ──────────────────────────────────────────────────────────
+*.pyc
+*.pyo
+__pycache__/
+*.class
+*.o
+*.so
+*.dylib
+*.dll
+*.exe
+
+# ─── Sensitive Information ────────────────────────────────────────────────────
+.env
+.env.local
+.env.*.local
+secrets/
+keys/
+*.pem
+*.key
+*.crt
+*.p12
+*.pfx
+password*
+secret*
+
+# ─── OS Specific ──────────────────────────────────────────────────────────────
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+Icon?
+._*
+
+# Windows  
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+
+# Linux
+.directory
+.trash-*
+
+# ─── Package Manager Artifacts ────────────────────────────────────────────────
+*.deb
+*.rpm
+*.pkg.tar.xz
+*.pkg.tar.zst
+
+# ─── Runtime Files ────────────────────────────────────────────────────────────
+*.pid
+*.lock
+*.socket
+
+# ─── Development and Testing ──────────────────────────────────────────────────
+test-output/
+coverage/
+.pytest_cache/
+.coverage
+*.cover
+
+# ─── Temporary Directories ────────────────────────────────────────────────────
+tmp/
+temp/
+.tmp/
+
+# ─── Personal Notes and Drafts ────────────────────────────────────────────────
+notes.txt
+TODO.txt
+draft*
+scratch*
+
+# ─── Archive Files ────────────────────────────────────────────────────────────
+*.zip
+*.tar.gz
+*.tar.bz2
+*.tar.xz
+*.7z
+*.rar

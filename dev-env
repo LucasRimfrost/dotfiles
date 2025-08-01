@@ -1,21 +1,17 @@
 #!/usr/bin/env bash
 dry_run="0"
-
 if [ -z "$XDG_CONFIG_HOME" ]; then
     echo "no xdg config home"
     echo "using ~/.config"
     XDG_CONFIG_HOME=$HOME/.config
 fi
-
 if [ -z "$DEV_ENV" ]; then
     echo "env var DEV_ENV needs to be present"
     exit 1
 fi
-
 if [[ $1 == "--dry" ]]; then
     dry_run="1"
 fi
-
 log() {
     if [[ $dry_run == "1" ]]; then
         echo "[DRY_RUN]: $1"
@@ -23,7 +19,6 @@ log() {
         echo "$1"
     fi
 }
-
 log "env: $DEV_ENV"
 
 update_files() {
@@ -32,16 +27,36 @@ update_files() {
     (
         configs=`find . -mindepth 1 -maxdepth 1 -type d`
         for c in $configs; do
-            directory=${2%/}/${c#./}
-            log "    removing: rm -rf $directory"
+            config_name=${c#./}
 
-            if [[ $dry_run == "0" ]]; then
-                rm -rf $directory
-            fi
-
-            log "    copying env: cp $c $2"
-            if [[ $dry_run == "0" ]]; then
-                cp -r ./$c $2
+            # Special handling for sddm.conf.d - copy to /etc instead of ~/.config
+            if [[ "$config_name" == "sddm.conf.d" ]]; then
+                directory="/etc/${config_name}"
+                log "    [SYSTEM] removing: sudo rm -rf $directory"
+                if [[ $dry_run == "0" ]]; then
+                    sudo rm -rf $directory
+                fi
+                log "    [SYSTEM] creating directory: sudo mkdir -p /etc"
+                if [[ $dry_run == "0" ]]; then
+                    sudo mkdir -p /etc
+                fi
+                log "    [SYSTEM] copying env: sudo cp -r $c /etc/"
+                if [[ $dry_run == "0" ]]; then
+                    sudo cp -r ./$c /etc/
+                    # Set proper ownership for system files
+                    sudo chown -R root:root $directory
+                fi
+            else
+                # Standard user config handling
+                directory=${2%/}/${config_name}
+                log "    removing: rm -rf $directory"
+                if [[ $dry_run == "0" ]]; then
+                    rm -rf $directory
+                fi
+                log "    copying env: cp $c $2"
+                if [[ $dry_run == "0" ]]; then
+                    cp -r ./$c $2
+                fi
             fi
         done
     )
@@ -61,6 +76,5 @@ copy() {
 
 update_files $DEV_ENV/env/.config $XDG_CONFIG_HOME
 update_files $DEV_ENV/env/.local $HOME/.local
-
 copy $DEV_ENV/env/.zshrc $HOME/.zshrc
 copy $DEV_ENV/env/.zprofile $HOME/.zprofile

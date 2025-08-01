@@ -123,7 +123,7 @@
         "tooltip-format-ethernet": "  {ifname}\nIP: {ipaddr}\n up: {bandwidthUpBits} down: {bandwidthDownBits}",
         "tooltip-format-disconnected": "Disconnected",
         "max-length": 50,
-        "on-click": "iwgtk &"
+        "on-click": "nm-connection-editor &"
     },
 
     // Battery - Simplified and Fixed

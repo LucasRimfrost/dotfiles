@@ -24,6 +24,10 @@ sudo pacman -S --noconfirm --needed python python-pip
 echo "Installing Go..."
 sudo pacman -S --noconfirm --needed go
 
+# Install Node.js and npm
+echo "Installing Node.js and npm..."
+sudo pacman -S --noconfirm --needed nodejs npm
+
 # Install Rust
 echo "Installing Rust..."
 sudo pacman -S --noconfirm --needed rustup
@@ -37,4 +41,6 @@ echo "- C/C++: $(gcc --version | head -1)"
 echo "- Java: $(java --version | head -1)"
 echo "- Python: $(python --version)"
 echo "- Go: $(go version)"
+echo "- Node.js: $(node --version)"
+echo "- npm: $(npm --version)"
 echo "- Rust: $(rustc --version)"
