@@ -27,18 +27,19 @@ sudo pacman -S --noconfirm --needed \
     wireplumber \
     pavucontrol
 
-# Display and graphics essentials
+# Display and graphics essentials (Intel UHD integrated graphics)
 echo "Installing graphics essentials..."
 sudo pacman -S --noconfirm --needed \
     mesa \
+    intel-media-driver \
+    vulkan-intel \
     vulkan-icd-loader
 
 # File manager and basic utilities
 echo "Installing file management essentials..."
 sudo pacman -S --noconfirm --needed \
     pcmanfm \
-    gvfs \
-    gvfs-mtp
+    gvfs
 
 # Network management
 echo "Installing network essentials..."
@@ -79,6 +80,13 @@ sudo pacman -S --noconfirm --needed \
     htop \
     tree
 
+# Power management essentials
+echo "Installing power management..."
+sudo pacman -S --noconfirm --needed \
+    acpi \
+    acpid \
+    power-profiles-daemon
+
 # Enable Flatpak Flathub repository
 echo "Enabling Flathub repository..."
 flatpak remote-add --if-not-exists flathub https://dl.flathub.org/repo/flathub.flatpakrepo
@@ -87,17 +95,24 @@ flatpak remote-add --if-not-exists flathub https://dl.flathub.org/repo/flathub.f
 echo "Installing Mission Center from Flatpak..."
 flatpak install -y flathub io.missioncenter.MissionCenter
 
+# Enable essential services
+echo "Enabling essential services..."
+sudo systemctl enable NetworkManager
+sudo systemctl enable acpid
+sudo systemctl enable power-profiles-daemon
+
 echo "Essential packages installed successfully!"
 echo ""
 echo "Installed essentials:"
 echo "- Wayland core and protocols"
 echo "- Audio system (PipeWire + pavucontrol)"
-echo "- Graphics drivers (Mesa)"
+echo "- Intel graphics drivers (Mesa + intel-media-driver + vulkan-intel)"
 echo "- File manager (PCManFM - lightweight)"
-echo "- Network management (NetworkManager)"
+echo "- Network management (NetworkManager - enabled)"
 echo "- Essential fonts"
 echo "- Clipboard manager (wl-clipboard)"
 echo "- System policies (Polkit)"
+echo "- Power management (ACPI + power-profiles-daemon - enabled)"
 echo "- Package management (Flatpak)"
 echo "- System monitoring (Mission Center via Flatpak)"
 echo "- Basic system tools (git, curl, wget, htop, tree)"
