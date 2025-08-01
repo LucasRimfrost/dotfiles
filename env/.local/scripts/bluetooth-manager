@@ -43,15 +43,24 @@ if [ ${#connected_devices[@]} -gt 0 ]; then
 
         # Use setsid for reliable process independence
         if command -v setsid >/dev/null; then
-            setsid ~/.local/bin/bluetooth-device-monitor.sh "$device_mac" >/dev/null 2>&1 &
-            log "Monitor started successfully for $device_mac"
+            # Check if monitor script exists and is executable
+            if [ -x "$HOME/.local/bin/bluetooth-device-monitor.sh" ]; then
+                setsid ~/.local/bin/bluetooth-device-monitor.sh "$device_mac" >/dev/null 2>&1 &
+                log "Monitor started successfully for $device_mac"
+            else
+                log "Warning: bluetooth-device-monitor.sh not found or not executable at $HOME/.local/bin/"
+            fi
         else
             # Fallback method
-            (
-                exec ~/.local/bin/bluetooth-device-monitor.sh "$device_mac" >/dev/null 2>&1
-            ) &
-            disown
-            log "Monitor started (fallback method) for $device_mac"
+            if [ -x "$HOME/.local/bin/bluetooth-device-monitor.sh" ]; then
+                (
+                    exec ~/.local/bin/bluetooth-device-monitor.sh "$device_mac" >/dev/null 2>&1
+                ) &
+                disown
+                log "Monitor started (fallback method) for $device_mac"
+            else
+                log "Warning: bluetooth-device-monitor.sh not found or not executable at $HOME/.local/bin/"
+            fi
         fi
     done
 

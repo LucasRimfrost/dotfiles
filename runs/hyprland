@@ -1,4 +1,7 @@
 #!/usr/bin/env bash
+
+set -e
+
 # Install hyprland and dependencies
 sudo pacman -S --noconfirm --needed hyprland hyprpaper xdg-desktop-portal-hyprland
 

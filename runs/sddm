@@ -1,4 +1,7 @@
 #!/usr/bin/env bash
+
+set -e
+
 script_dir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
 
 # Install SDDM and theme
@@ -10,7 +13,13 @@ if [ -f "$script_dir/sddm-theme.conf" ]; then
     echo "Applying custom Sugar-Candy theme configuration..."
     sudo cp "$script_dir/sddm-theme.conf" /usr/share/sddm/themes/sugar-candy/theme.conf
     sudo chown root:root /usr/share/sddm/themes/sugar-candy/theme.conf
-    sudo cp /home/lucas/.config/hypr/assets/wallpapers/Game-GTA.png /usr/share/sddm/themes/sugar-candy/Backgrounds/
+    # Copy wallpaper from dotfiles source (not from deployed config)
+    wallpaper_source="$script_dir/../env/.config/hypr/assets/wallpapers/Game-GTA.png"
+    if [ -f "$wallpaper_source" ]; then
+        sudo cp "$wallpaper_source" /usr/share/sddm/themes/sugar-candy/Backgrounds/
+    else
+        echo "Warning: Wallpaper not found at $wallpaper_source"
+    fi
     echo "Custom theme configuration applied."
 else
     echo "Warning: sddm-theme.conf not found in $script_dir"

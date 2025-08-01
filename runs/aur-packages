@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+set -e
+
 # Ensure paru is installed first
 if ! command -v paru &> /dev/null; then
   echo "Installing paru first..."

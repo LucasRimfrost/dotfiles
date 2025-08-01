@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+set -e
+
 echo "Installing zsh and oh-my-zsh with plugins..."
 
 # Install zsh
@@ -11,8 +13,7 @@ sudo chsh -s $(which zsh) $USER
 # Install oh-my-zsh (non-interactive)
 if [ ! -d "$HOME/.oh-my-zsh" ]; then
   echo "Installing oh-my-zsh..."
-  sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)" ""
-  --unattended
+  sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)" "" --unattended
 fi
 
 # Install zsh-autosuggestions plugin

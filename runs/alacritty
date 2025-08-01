@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
 
+set -e
+
 # Install alacritty
 sudo pacman -S --noconfirm --needed alacritty ttf-jetbrains-mono-nerd

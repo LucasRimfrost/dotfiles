@@ -10,6 +10,35 @@
 # Required: paru figlet gum timeshift btrfs-grub
 # -----------------------------------------------------
 
+# Check for required dependencies
+check_dependencies() {
+    local missing_deps=()
+    
+    # Check for required commands
+    if ! command -v paru &> /dev/null; then
+        missing_deps+=("paru")
+    fi
+    if ! command -v figlet &> /dev/null; then
+        missing_deps+=("figlet")
+    fi
+    if ! command -v gum &> /dev/null; then
+        missing_deps+=("gum")
+    fi
+    if ! command -v notify-send &> /dev/null; then
+        missing_deps+=("libnotify")
+    fi
+    
+    if [ ${#missing_deps[@]} -ne 0 ]; then
+        echo "Error: Missing required dependencies: ${missing_deps[*]}"
+        echo "Please install them first:"
+        echo "sudo pacman -S ${missing_deps[*]}"
+        exit 1
+    fi
+}
+
+# Check dependencies before proceeding
+check_dependencies
+
 sleep 1
 clear
 figlet "Updates"

@@ -1,8 +1,15 @@
 #!/bin/bash
-exec brave --password-store=basic --ozone-platform=wayland \
+
+# Detect display server and set appropriate platform
+if [[ "$XDG_SESSION_TYPE" == "wayland" ]] || [[ -n "$WAYLAND_DISPLAY" ]]; then
+    PLATFORM="--ozone-platform=wayland --enable-features=UseOzonePlatform,WebRTCPipeWireCapturer"
+else
+    PLATFORM="--ozone-platform=x11"
+fi
+
+exec brave --password-store=basic $PLATFORM \
   --force-device-scale-factor=1.0 --disable-background-networking \
   --disable-background-timer-throttling --disable-dev-shm-usage \
-  --enable-features=UseOzonePlatform,WebRTCPipeWireCapturer \
   --disable-extensions-http-throttling --memory-pressure-off \
   --max_old_space_size=2048 --disable-background-mode \
   --disable-component-update --process-per-site "$@"

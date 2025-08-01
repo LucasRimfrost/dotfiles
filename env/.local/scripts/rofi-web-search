@@ -1,5 +1,12 @@
 #!/usr/bin/env bash
-query=$(rofi -dmenu -p "🔍 Search" -theme pywal-modern)
+
+# Check if pywal-modern theme exists, use default if not
+THEME_ARG=""
+if rofi -dump-theme pywal-modern >/dev/null 2>&1; then
+    THEME_ARG="-theme pywal-modern"
+fi
+
+query=$(rofi -dmenu -p "🔍 Search" $THEME_ARG)
 if [ -n "$query" ]; then
     xdg-open "https://search.brave.com/search?q=$query"
 fi
