@@ -8,7 +8,7 @@ paru -S --noconfirm --needed sddm-sugar-candy-git
 # Apply custom theme configuration
 if [ -f "$script_dir/sddm-theme.conf" ]; then
     echo "Applying custom Sugar-Candy theme configuration..."
-    sudo cp "$script_dir/sddm-theme.conf" /usr/share/sddm/themes/sugar-sandy/theme.conf
+    sudo cp "$script_dir/sddm-theme.conf" /usr/share/sddm/themes/sugar-candy/theme.conf
     sudo chown root:root /usr/share/sddm/themes/sugar-candy/theme.conf
     echo "Custom theme configuration applied."
 else
