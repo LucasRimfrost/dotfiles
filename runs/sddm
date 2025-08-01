@@ -8,8 +8,8 @@ paru -S --noconfirm --needed sddm-sugar-candy-git
 # Apply custom theme configuration
 if [ -f "$script_dir/sddm-theme.conf" ]; then
     echo "Applying custom Sugar-Candy theme configuration..."
-    sudo cp "$script_dir/sddm-theme.conf" /usr/share/sddm/themes/Sugar-Candy/theme.conf
-    sudo chown root:root /usr/share/sddm/themes/Sugar-Candy/theme.conf
+    sudo cp "$script_dir/sddm-theme.conf" /usr/share/sddm/themes/sugar-sandy/theme.conf
+    sudo chown root:root /usr/share/sddm/themes/sugar-candy/theme.conf
     echo "Custom theme configuration applied."
 else
     echo "Warning: sddm-theme.conf not found in $script_dir"
@@ -19,7 +19,7 @@ fi
 sudo mkdir -p /etc/sddm.conf.d
 sudo tee /etc/sddm.conf.d/10-theme.conf > /dev/null <<EOF
 [Theme]
-Current=Sugar-Candy
+Current=sugar-candy
 CursorTheme=breeze_cursors
 EOF
 
