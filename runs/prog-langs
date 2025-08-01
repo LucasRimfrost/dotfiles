@@ -29,10 +29,10 @@ echo "Installing Node.js and npm..."
 sudo pacman -S --noconfirm --needed nodejs npm
 
 # Install Rust
-echo "Installing Rust..."
-curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
-rustup default stable
-rustup component add clippy
+#echo "Installing Rust..."
+#curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
+#rustup default stable
+#rustup component add clippy
 
 echo "All programming languages installed successfully!"
 echo ""

@@ -13,7 +13,6 @@ echo "Installing Wayland essentials..."
 sudo pacman -S --noconfirm --needed \
     wayland \
     wayland-protocols \
-    wlroots \
     xdg-desktop-portal \
     xdg-desktop-portal-wlr \
     xdg-utils
