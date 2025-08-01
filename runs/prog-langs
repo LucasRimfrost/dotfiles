@@ -30,7 +30,7 @@ sudo pacman -S --noconfirm --needed nodejs npm
 
 # Install Rust
 echo "Installing Rust..."
-sudo pacman -S --noconfirm --needed rustup
+curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
 rustup default stable
 rustup component add clippy
 
